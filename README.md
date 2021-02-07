@@ -9,3 +9,7 @@ This is a cloudformation script to deploy network infrastructure and servers for
 
 - Servers.yml deploys LoadBalancer, Launch Configuration, AutoScaling group a health check, security groups and a Listener and Target Group.
 - serverParams.json is the parameters needed to deploy that servers for the webapp.
+
+
+## Execution
+- You can run this by executing the shell script create-stack.sh, or update-stack.sh in case your stack was created already.
