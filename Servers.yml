@@ -4,6 +4,36 @@ Parameters:
     EnvironmentName:
         Description: An environment name that will be prefixed to resource names
         Type: String
+    MyAMI:
+        Description: An Amazom Machine Image ID.
+        Type: String
+    InstanceType:
+        Description: The server type.
+        Type: String
+    HealthyThreshold:
+        Description: The number of consecutive health checks successes required before considering an unhealthy target healthy.
+        Type: String
+    UnHealthyThreshold:
+        Description: The number of consecutive health check failures required before considering a target unhealthy.
+        Type: String
+    HealthCheckIntervalSecs:
+        Description: The approximate amount of time, in seconds, between health checks of an individual target.
+        Type: String
+    HealthCheckTimeoutSecs:
+        Description: The amount of time, in seconds, during which no response from a target means a failed health check.
+        Type: String
+    LBSecIngressCidr:
+        Description: Please enter the IP range (CIDR notation) for the LB inbound requests.
+        Type: String
+    LBSecEgressCidr:
+        Description: Please enter the IP range (CIDR notation) for the LB outbound requests.
+        Type: String
+    websSecEgressCidr:
+        Description: Please enter the IP range (CIDR notation) for the web server outbound requests
+        Type: String
+    websSecIngressCidr:
+        Description: Please enter the IP range (CIDR notation) for the web server inbound requests.
+        Type: String
 Resources:
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
@@ -16,12 +46,12 @@ Resources:
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref LBSecIngressCidr
       SecurityGroupEgress:
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref LBSecEgressCidr
   WebServerSecGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -33,16 +63,16 @@ Resources:
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref websSecIngressCidr
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref websSecIngressCidr
       SecurityGroupEgress:
       - IpProtocol: tcp
         FromPort: 0
         ToPort: 65535
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref websSecIngressCidr
   S3IAMRole:
     Type: AWS::IAM::Role
     Properties:
@@ -53,24 +83,17 @@ Resources:
             Effect: Allow
             Principal:
               Service:
-                - s3.amazonaws.com
+                - ec2.amazonaws.com
   BucketPolicy:
     Type: 'AWS::IAM::Policy'
     Properties:
       PolicyDocument:
         Statement:
           - Action:
-              - 's3:GetObject'
-              - 's3:GetObjectVersion'
+              - 's3:Get*'
+              - 's3:List*'
             Effect: Allow
-            Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Join
-                    - '-'
-                    - - !Ref 'AWS::Region'
-                  - /*
+            Resource: "*"
       PolicyName: BucketPolicy
       Roles:
         - !Ref S3IAMRole
@@ -99,12 +122,14 @@ Resources:
           apt-get install -y docker-ce
           usermod -aG docker ubuntu
           sudo docker run -dit --name tecmint-web -p 80:80 -v /home/user/website/:/usr/local/apache2/htdocs/ httpd:2.4
-          echo "<center><h1>it works! Udagram, Udacity!</h1></center>" > /home/user/website/index.html
-      ImageId: ami-00ddb0e5626798373
+          cd /home/user/website/
+          sudo apt install awscli -y
+          aws s3 cp s3://projectnum2/index.html .
+      ImageId: !Ref MyAMI
       IamInstanceProfile: !Ref InstanceProfile
       SecurityGroups:
         - !Ref WebServerSecGroup
-      InstanceType: t2.medium
+      InstanceType: !Ref InstanceType
       BlockDeviceMappings:
       - DeviceName: "/dev/sda1"
         Ebs:
@@ -154,14 +179,14 @@ Resources:
   WebAppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 15
+      HealthCheckIntervalSeconds: !Ref HealthCheckIntervalSecs
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 10
-      HealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: !Ref HealthCheckTimeoutSecs
+      HealthyThresholdCount: !Ref HealthyThreshold
       Port: 80
       Protocol: HTTP
-      UnhealthyThresholdCount: 4
+      UnhealthyThresholdCount: !Ref UnHealthyThreshold
       VpcId: 
         Fn::ImportValue:
           Fn::Sub: "${EnvironmentName}-VPCID"

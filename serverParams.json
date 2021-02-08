@@ -2,5 +2,35 @@
 	{
 		"ParameterKey": "EnvironmentName",
 		"ParameterValue": "MyProjectNum2"
+	},{
+		"ParameterKey": "MyAMI",
+		"ParameterValue": "ami-00ddb0e5626798373"
+	},{
+		"ParameterKey": "InstanceType",
+		"ParameterValue": "t2.medium"
+	},{
+		"ParameterKey": "HealthyThreshold",
+		"ParameterValue": "2"
+	},{
+		"ParameterKey": "UnHealthyThreshold",
+		"ParameterValue": "4"
+	},{
+		"ParameterKey": "HealthCheckIntervalSecs",
+		"ParameterValue": "15"
+	},{
+		"ParameterKey": "HealthCheckTimeoutSecs",
+		"ParameterValue": "10"
+	},{
+		"ParameterKey": "LBSecIngressCidr",
+		"ParameterValue": "0.0.0.0/0"
+	},{
+		"ParameterKey": "LBSecEgressCidr",
+		"ParameterValue": "0.0.0.0/0"
+	},{
+		"ParameterKey": "websSecEgressCidr",
+		"ParameterValue": "0.0.0.0/0"
+	},{
+		"ParameterKey": "websSecIngressCidr",
+		"ParameterValue": "0.0.0.0/0"
 	}
 ]
