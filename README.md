@@ -13,3 +13,6 @@ This is a cloudformation script to deploy network infrastructure and servers for
 
 ## Execution
 - You can run this by executing the shell script create-stack.sh, or update-stack.sh in case your stack was created already.
+
+## Output
+- It retrieves the LB DNS URL that is needed to access the webpage.
